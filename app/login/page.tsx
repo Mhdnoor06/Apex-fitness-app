@@ -1,11 +1,56 @@
-import type { Metadata } from "next";
+"use client"
 
-export const metadata: Metadata = {
-  title: "Login - FitFlow",
-  description: "Login to your FitFlow account to continue your fitness journey",
-};
+import { useState, useEffect } from "react"
+import { signIn } from "next-auth/react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 export default function Login() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [onboardingComplete, setOnboardingComplete] = useState(false)
+  
+  useEffect(() => {
+    const emailParam = searchParams.get("email")
+    const onboardingParam = searchParams.get("onboarding")
+    
+    if (emailParam) {
+      setEmail(emailParam)
+    }
+    
+    if (onboardingParam === "complete") {
+      setOnboardingComplete(true)
+    }
+  }, [searchParams])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    setIsLoading(true)
+
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError("Invalid email or password")
+      } else {
+        router.push("/")
+        router.refresh()
+      }
+    } catch (error) {
+      setError("An error occurred. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-x-hidden p-4">
       {/* Background Image */}
@@ -29,33 +74,59 @@ export default function Login() {
         <div className="w-full flex flex-col gap-4">
           <h2 className="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] text-center mb-2">Login</h2>
 
-          <div className="flex flex-col">
-            <label className="text-white text-base font-medium leading-normal pb-2" htmlFor="email">Email Address</label>
-            <input
-              className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-white/20 bg-white/5 focus:border-primary h-14 placeholder:text-white/40 p-[15px] text-base font-normal leading-normal"
-              id="email"
-              placeholder="Enter your email address"
-              type="email"
-            />
-          </div>
+          {onboardingComplete && (
+            <div className="w-full p-3 rounded-lg bg-green-500/20 border border-green-500/50 text-green-200 text-sm">
+              🎉 Onboarding complete! Please login to access your dashboard.
+            </div>
+          )}
 
-          <div className="flex flex-col">
-            <label className="text-white text-base font-medium leading-normal pb-2" htmlFor="password">Password</label>
-            <input
-              className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-white/20 bg-white/5 focus:border-primary h-14 placeholder:text-white/40 p-[15px] text-base font-normal leading-normal"
-              id="password"
-              placeholder="Enter your password"
-              type="password"
-            />
-          </div>
+          {error && (
+            <div className="w-full p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-200 text-sm">
+              {error}
+            </div>
+          )}
 
-          <div className="text-right mt-1">
-            <a className="text-primary-start/80 hover:text-primary-start text-sm font-medium" href="#">Forgot Password?</a>
-          </div>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col">
+              <label className="text-white text-base font-medium leading-normal pb-2" htmlFor="email">Email Address</label>
+              <input
+                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-white/20 bg-white/5 focus:border-primary h-14 placeholder:text-white/40 p-[15px] text-base font-normal leading-normal"
+                id="email"
+                placeholder="Enter your email address"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
 
-          <button className="flex items-center justify-center whitespace-nowrap h-14 w-full rounded-lg bg-gradient-to-r from-primary-start to-primary-end text-white text-base font-bold leading-normal mt-4 transition-transform duration-200 ease-in-out hover:scale-[1.02] shadow-[0_4px_15px_0_rgba(244,92,67,0.3)] hover:shadow-[0_4px_20px_0_rgba(235,51,73,0.4)]">
-            Login
-          </button>
+            <div className="flex flex-col">
+              <label className="text-white text-base font-medium leading-normal pb-2" htmlFor="password">Password</label>
+              <input
+                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-white/20 bg-white/5 focus:border-primary h-14 placeholder:text-white/40 p-[15px] text-base font-normal leading-normal"
+                id="password"
+                placeholder="Enter your password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="text-right mt-1">
+              <a className="text-primary-start/80 hover:text-primary-start text-sm font-medium" href="/forgot-password">Forgot Password?</a>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex items-center justify-center whitespace-nowrap h-14 w-full rounded-lg bg-gradient-to-r from-primary-start to-primary-end text-white text-base font-bold leading-normal mt-4 transition-transform duration-200 ease-in-out hover:scale-[1.02] shadow-[0_4px_15px_0_rgba(244,92,67,0.3)] hover:shadow-[0_4px_20px_0_rgba(235,51,73,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Logging in..." : "Login"}
+            </button>
+          </form>
         </div>
 
         {/* Social Login Divider */}
@@ -100,7 +171,7 @@ export default function Login() {
         <div className="mt-8 text-center">
           <p className="text-white/60">
             Don&apos;t have an account?{' '}
-            <a className="font-bold text-primary-start hover:underline" href="#">
+            <a className="font-bold text-primary-start hover:underline" href="/signup">
               Sign Up
             </a>
           </p>

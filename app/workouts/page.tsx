@@ -129,27 +129,6 @@ export default function Workouts() {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-10 mx-auto max-w-md">
-        <div className="flex h-20 items-center justify-around border-t border-gray-200 bg-background-light/80 dark:border-gray-800 dark:bg-background-dark/80 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400">
-            <span className="material-symbols-outlined">home</span>
-            <p className="text-xs font-medium">Home</p>
-          </div>
-          <div className="flex flex-col items-center gap-1 text-transparent bg-clip-text bg-gradient-to-br from-primary-start to-primary-end">
-            <span className="material-symbols-outlined text-primary-start">fitness_center</span>
-            <p className="text-xs font-bold">Workouts</p>
-          </div>
-          <div className="flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400">
-            <span className="material-symbols-outlined">bar_chart</span>
-            <p className="text-xs font-medium">Progress</p>
-          </div>
-          <div className="flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400">
-            <span className="material-symbols-outlined">person</span>
-            <p className="text-xs font-medium">Profile</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

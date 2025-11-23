@@ -172,25 +172,6 @@ export default function Progress() {
 
       <div className="h-24"></div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 flex justify-around items-center px-4">
-        <button className="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 w-16">
-          <span className="material-symbols-outlined text-2xl">home</span>
-          <span className="text-xs font-medium">Home</span>
-        </button>
-        <button className="flex flex-col items-center justify-center gap-1 w-16 text-transparent bg-clip-text bg-gradient-to-br from-primary-start to-primary-end">
-          <span className="material-symbols-outlined text-2xl">bar_chart</span>
-          <span className="text-xs font-bold">Progress</span>
-        </button>
-        <button className="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 w-16">
-          <span className="material-symbols-outlined text-2xl">fitness_center</span>
-          <span className="text-xs font-medium">Workouts</span>
-        </button>
-        <button className="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 w-16">
-          <span className="material-symbols-outlined text-2xl">account_circle</span>
-          <span className="text-xs font-medium">Profile</span>
-        </button>
-      </div>
     </div>
   );
 }

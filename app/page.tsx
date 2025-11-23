@@ -1,6 +1,38 @@
 import Image from "next/image";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 
-export default function Home() {
+async function getUserData(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      name: true,
+      targetCalories: true,
+      targetProtein: true,
+      bmi: true,
+      tdee: true,
+    },
+  });
+  return user;
+}
+
+export default async function Home() {
+  const session = await auth();
+  const user = session?.user?.id ? await getUserData(session.user.id) : null;
+  
+  const userName = user?.name || session?.user?.name || "User";
+  const targetCalories = user?.targetCalories || 0;
+  const targetProtein = user?.targetProtein || 0;
+  
+  // Get greeting based on time
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
+  
+  // Get current date
+  const date = new Date();
+  const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+  const formattedDate = date.toLocaleDateString('en-US', options);
+  
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col font-display group/design-root overflow-x-hidden pb-24">
       {/* Header Section */}
@@ -21,32 +53,30 @@ export default function Home() {
             </button>
           </div>
         </div>
-        <p className="text-slate-900 dark:text-white tracking-light text-[28px] font-bold leading-tight">Good Morning, Alex</p>
-        <p className="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal pt-1">Tuesday, 28 May</p>
+        <p className="text-slate-900 dark:text-white tracking-light text-[28px] font-bold leading-tight">
+          {greeting}, {userName.split(' ')[0] || 'User'}
+        </p>
+        <p className="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal pt-1">{formattedDate}</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="flex flex-wrap gap-4 p-4">
-        <div className="flex min-w-[158px] flex-1 flex-col gap-4 rounded-xl p-6 bg-white dark:bg-slate-800/50 shadow-sm">
-          <span className="material-symbols-outlined text-primary-start text-3xl">footprint</span>
-          <div>
-            <p className="text-slate-500 dark:text-slate-400 text-base font-medium leading-normal">Steps</p>
-            <p className="text-slate-900 dark:text-white tracking-light text-2xl font-bold leading-tight">6,540</p>
-          </div>
+      <div className="grid grid-cols-2 gap-4 p-4">
+        <div className="flex flex-col gap-3 rounded-xl p-4 sm:p-6 bg-slate-800/50 dark:bg-slate-800/50 min-w-0">
+          <span className="material-symbols-outlined text-primary-start text-2xl sm:text-3xl">footprint</span>
+          <p className="text-white text-sm sm:text-base font-normal">Steps</p>
+          <p className="text-white text-xl sm:text-2xl font-bold leading-tight">6,540</p>
         </div>
-        <div className="flex min-w-[158px] flex-1 flex-col gap-4 rounded-xl p-6 bg-white dark:bg-slate-800/50 shadow-sm">
-          <span className="material-symbols-outlined text-primary-start text-3xl">local_fire_department</span>
-          <div>
-            <p className="text-slate-500 dark:text-slate-400 text-base font-medium leading-normal">Calories</p>
-            <p className="text-slate-900 dark:text-white tracking-light text-2xl font-bold leading-tight">350 kcal</p>
-          </div>
+        <div className="flex flex-col gap-3 rounded-xl p-4 sm:p-6 bg-slate-800/50 dark:bg-slate-800/50 min-w-0">
+          <span className="material-symbols-outlined text-primary-start text-2xl sm:text-3xl">local_fire_department</span>
+          <p className="text-white text-sm sm:text-base font-normal">Target Calories</p>
+          <p className="text-white text-xl sm:text-2xl font-bold leading-tight">
+            {targetCalories > 0 ? `${targetCalories.toLocaleString()} kcal` : "—"}
+          </p>
         </div>
-        <div className="flex min-w-[158px] flex-1 flex-col gap-4 rounded-xl p-6 bg-white dark:bg-slate-800/50 shadow-sm">
-          <span className="material-symbols-outlined text-primary-start text-3xl">timer</span>
-          <div>
-            <p className="text-slate-500 dark:text-slate-400 text-base font-medium leading-normal">Active Time</p>
-            <p className="text-slate-900 dark:text-white tracking-light text-2xl font-bold leading-tight">45 min</p>
-          </div>
+        <div className="flex flex-col gap-3 rounded-xl p-4 sm:p-6 bg-slate-800/50 dark:bg-slate-800/50 col-span-2 min-w-0">
+          <span className="material-symbols-outlined text-primary-start text-2xl sm:text-3xl">timer</span>
+          <p className="text-white text-sm sm:text-base font-normal">Active Time</p>
+          <p className="text-white text-xl sm:text-2xl font-bold leading-tight">45 min</p>
         </div>
       </div>
 
@@ -100,31 +130,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-t border-slate-200 dark:border-slate-800">
-        <div className="grid h-full max-w-lg grid-cols-5 mx-auto font-medium">
-          <button className="inline-flex flex-col items-center justify-center px-5 text-transparent bg-clip-text bg-gradient-to-r from-primary-start to-primary-end" type="button">
-            <span className="material-symbols-outlined text-2xl mb-1">home</span>
-            <span className="text-xs font-bold">Home</span>
-          </button>
-          <button className="inline-flex flex-col items-center justify-center px-5 text-slate-500 dark:text-slate-400 hover:text-primary-start" type="button">
-            <span className="material-symbols-outlined text-2xl mb-1">fitness_center</span>
-            <span className="text-xs font-medium">Workouts</span>
-          </button>
-          <button className="inline-flex flex-col items-center justify-center px-5 text-slate-500 dark:text-slate-400 hover:text-primary-start" type="button">
-            <span className="material-symbols-outlined text-2xl mb-1">bar_chart</span>
-            <span className="text-xs font-medium">Progress</span>
-          </button>
-          <button className="inline-flex flex-col items-center justify-center px-5 text-slate-500 dark:text-slate-400 hover:text-primary-start" type="button">
-            <span className="material-symbols-outlined text-2xl mb-1">groups</span>
-            <span className="text-xs font-medium">Community</span>
-          </button>
-          <button className="inline-flex flex-col items-center justify-center px-5 text-slate-500 dark:text-slate-400 hover:text-primary-start" type="button">
-            <span className="material-symbols-outlined text-2xl mb-1">person</span>
-            <span className="text-xs font-medium">Profile</span>
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

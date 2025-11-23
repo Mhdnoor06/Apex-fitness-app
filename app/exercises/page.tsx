@@ -114,35 +114,6 @@ export default function Exercises() {
         </div>
       </main>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0">
-        <div className="flex gap-2 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 backdrop-blur-sm px-4 pb-3 pt-2">
-          <a className="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 dark:text-slate-400" href="/">
-            <div className="flex h-8 items-center justify-center">
-              <span className="material-symbols-outlined">home</span>
-            </div>
-            <p className="text-xs font-medium leading-normal tracking-[0.015em]">Home</p>
-          </a>
-          <a className="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 dark:text-slate-400" href="/workouts">
-            <div className="flex h-8 items-center justify-center">
-              <span className="material-symbols-outlined">fitness_center</span>
-            </div>
-            <p className="text-xs font-medium leading-normal tracking-[0.015em]">Workouts</p>
-          </a>
-          <a className="flex flex-1 flex-col items-center justify-end gap-1" href="/exercises">
-            <div className="flex h-8 items-center justify-center">
-              <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-r from-primary-start to-primary-end">import_contacts</span>
-            </div>
-            <p className="text-transparent bg-clip-text bg-gradient-to-r from-primary-start to-primary-end text-xs font-medium leading-normal tracking-[0.015em]">Library</p>
-          </a>
-          <a className="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 dark:text-slate-400" href="/progress">
-            <div className="flex h-8 items-center justify-center">
-              <span className="material-symbols-outlined">person</span>
-            </div>
-            <p className="text-xs font-medium leading-normal tracking-[0.015em]">Profile</p>
-          </a>
-        </div>
-      </div>
     </div>
   );
 }

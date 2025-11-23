@@ -1,11 +1,54 @@
-import type { Metadata } from "next";
+"use client"
 
-export const metadata: Metadata = {
-  title: "Sign Up - FitFlow",
-  description: "Create your FitFlow account and start your fitness journey",
-};
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
+import { authService, ApiError } from "@/lib/api"
 
 export default function SignUp() {
+  const router = useRouter()
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    setIsLoading(true)
+
+    try {
+      await authService.signup({ name, email, password })
+
+      // Store email in localStorage for onboarding
+      localStorage.setItem("onboardingEmail", email)
+      
+      // Automatically log the user in after signup
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      })
+      
+      if (result?.error) {
+        // If auto-login fails, redirect to login page
+        router.push(`/login?email=${encodeURIComponent(email)}`)
+      } else {
+        // Redirect to onboarding after successful signup and login
+        router.push("/onboarding")
+        router.refresh()
+      }
+    } catch (error: unknown) {
+      if (error instanceof ApiError) {
+        setError(error.message)
+      } else {
+        setError("An error occurred. Please try again.")
+      }
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-x-hidden p-4">
       {/* Background Image */}
@@ -29,7 +72,13 @@ export default function SignUp() {
         <div className="w-full flex flex-col gap-4">
           <h2 className="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] text-center mb-2">Create your account</h2>
 
-          <div className="flex flex-col gap-4">
+          {error && (
+            <div className="w-full p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-200 text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col">
               <label className="text-white text-base font-medium leading-normal pb-2" htmlFor="name">
                 Name
@@ -39,6 +88,10 @@ export default function SignUp() {
                 id="name"
                 placeholder="Enter your full name"
                 type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                disabled={isLoading}
               />
             </div>
 
@@ -51,6 +104,10 @@ export default function SignUp() {
                 id="email"
                 placeholder="Enter your email address"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
               />
             </div>
 
@@ -63,13 +120,21 @@ export default function SignUp() {
                 id="password"
                 placeholder="Enter your password"
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
               />
             </div>
-          </div>
 
-          <button className="flex items-center justify-center whitespace-nowrap h-14 w-full rounded-lg bg-gradient-to-r from-primary-start to-primary-end text-white text-base font-bold leading-normal mt-4 transition-transform duration-200 ease-in-out hover:scale-[1.02] shadow-[0_4px_15px_0_rgba(244,92,67,0.3)] hover:shadow-[0_4px_20px_0_rgba(235,51,73,0.4)]">
-            Sign Up
-          </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex items-center justify-center whitespace-nowrap h-14 w-full rounded-lg bg-gradient-to-r from-primary-start to-primary-end text-white text-base font-bold leading-normal mt-4 transition-transform duration-200 ease-in-out hover:scale-[1.02] shadow-[0_4px_15px_0_rgba(244,92,67,0.3)] hover:shadow-[0_4px_20px_0_rgba(235,51,73,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Signing up..." : "Sign Up"}
+            </button>
+          </form>
         </div>
 
         {/* Footer Link */}
