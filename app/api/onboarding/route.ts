@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { completeOnboarding } from "@/lib/services/user.service"
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,29 +17,18 @@ export async function POST(req: NextRequest) {
       targetProtein,
     } = await req.json()
 
-    if (!email) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      )
-    }
-
-    // Update user with onboarding data
-    const user = await prisma.user.update({
-      where: { email },
-      data: {
-        gender,
-        age: age ? parseInt(age) : null,
-        height: height ? parseFloat(height) : null,
-        weight: weight ? parseFloat(weight) : null,
-        goal,
-        activityLevel,
-        bmi: bmi ? parseFloat(bmi) : null,
-        tdee: tdee ? parseInt(tdee) : null,
-        targetCalories: targetCalories ? parseInt(targetCalories) : null,
-        targetProtein: targetProtein ? parseInt(targetProtein) : null,
-        onboardingCompleted: true,
-      },
+    const user = await completeOnboarding({
+      email,
+      gender,
+      age,
+      height,
+      weight,
+      goal,
+      activityLevel,
+      bmi,
+      tdee,
+      targetCalories,
+      targetProtein,
     })
 
     return NextResponse.json(
@@ -48,6 +37,15 @@ export async function POST(req: NextRequest) {
     )
   } catch (error) {
     console.error("Onboarding error:", error)
+
+    // Handle validation errors
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      )
+    }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

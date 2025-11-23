@@ -31,3 +31,27 @@ body {
     'GRAD' 0,
     'opsz' 24
 }
+
+/* Utility classes for common gradients to avoid duplicate class warnings */
+.bg-gradient-primary {
+  background: linear-gradient(to right, var(--color-primary-start), var(--color-primary-end));
+}
+
+.bg-gradient-primary-br {
+  background: linear-gradient(to bottom right, var(--color-primary-start), var(--color-primary-end));
+}
+
+.bg-gradient-primary-t {
+  background: linear-gradient(to top, var(--color-primary-start), var(--color-primary-end));
+}
+
+.text-gradient-primary {
+  background: linear-gradient(to right, var(--color-primary-start), var(--color-primary-end));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-gradient-overlay {
+  background: linear-gradient(to top, var(--color-background-dark), color-mix(in srgb, var(--color-background-dark) 80%, transparent), transparent);
+}

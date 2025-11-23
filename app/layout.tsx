@@ -31,7 +31,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased" style={{fontFamily: 'Inter, sans-serif'}}>
+      <body className="antialiased" style={{fontFamily: 'Inter, sans-serif'}} suppressHydrationWarning>
         <Providers>
           {children}
           <LayoutNavigation />

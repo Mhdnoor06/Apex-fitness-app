@@ -1,37 +1,41 @@
 import Image from "next/image";
+import Link from "next/link";
 import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
-
-async function getUserData(userId: string) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      name: true,
-      targetCalories: true,
-      targetProtein: true,
-      bmi: true,
-      tdee: true,
-    },
-  });
-  return user;
-}
+import { getUserProfile } from "@/lib/services/user.service";
+import { getTodayActivity, getWeeklyActivitySummary } from "@/lib/services/activity.service";
+import { getTodayNutritionSummary } from "@/lib/services/nutrition.service";
+import { HomeHeader } from "@/components/home-header";
 
 export default async function Home() {
   const session = await auth();
-  const user = session?.user?.id ? await getUserData(session.user.id) : null;
+
+  // Fetch data using service layer
+  const user = session?.user?.id ? await getUserProfile(session.user.id) : null;
+  const todayActivity = session?.user?.id ? await getTodayActivity(session.user.id) : { steps: 0, activeMinutes: 0, caloriesBurned: null, distance: null, userId: '', date: new Date() };
+  const weeklyActivityData = session?.user?.id ? await getWeeklyActivitySummary(session.user.id) : null;
+  const nutritionSummary = session?.user?.id ? await getTodayNutritionSummary(session.user.id) : null;
+
+  // Transform weekly activity data for the chart
+  const weeklyActivity = weeklyActivityData
+    ? (() => {
+        const maxMinutes = Math.max(...weeklyActivityData.weekData.map(d => d.activeMinutes), 1);
+        return {
+          totalMinutes: weeklyActivityData.totalActiveMinutes,
+          weekData: weeklyActivityData.weekData.map((day, index) => ({
+            dayName: day.dayName,
+            minutes: day.activeMinutes,
+            percentage: maxMinutes > 0 ? (day.activeMinutes / maxMinutes) * 100 : 0,
+            isToday: index === weeklyActivityData.weekData.length - 1,
+          })),
+        };
+      })()
+    : { totalMinutes: 0, weekData: [] };
   
   const userName = user?.name || session?.user?.name || "User";
   const targetCalories = user?.targetCalories || 0;
   const targetProtein = user?.targetProtein || 0;
-  
-  // Get greeting based on time
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
-  
-  // Get current date
-  const date = new Date();
-  const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
-  const formattedDate = date.toLocaleDateString('en-US', options);
+  const steps = todayActivity.steps || 0;
+  const activeMinutes = todayActivity.activeMinutes || 0;
   
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col font-display group/design-root overflow-x-hidden pb-24">
@@ -53,10 +57,86 @@ export default async function Home() {
             </button>
           </div>
         </div>
-        <p className="text-slate-900 dark:text-white tracking-light text-[28px] font-bold leading-tight">
-          {greeting}, {userName.split(' ')[0] || 'User'}
-        </p>
-        <p className="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal pt-1">{formattedDate}</p>
+        <HomeHeader userName={userName} />
+      </div>
+
+      {/* Nutrition Cards */}
+      <div className="px-4 pt-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-slate-900 dark:text-white text-lg font-bold">Today&apos;s Nutrition</h2>
+          <Link
+            href="/nutrition"
+            className="text-primary-start text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all"
+          >
+            View All
+            <span className="material-symbols-outlined text-lg">arrow_forward</span>
+          </Link>
+        </div>
+        <Link href="/nutrition" className="block">
+          <div className="grid grid-cols-1 gap-4">
+            {/* Calories Card */}
+            <div className="flex flex-col gap-3 rounded-xl p-6 bg-white dark:bg-slate-800/50 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-primary-start text-3xl">restaurant</span>
+                  <div>
+                    <p className="text-slate-900 dark:text-white text-base font-semibold">Calories</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm">
+                      {nutritionSummary?.caloriesConsumed || 0} / {nutritionSummary?.targetCalories || 0} kcal
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-slate-900 dark:text-white text-2xl font-bold">
+                    {nutritionSummary?.caloriesRemaining || 0}
+                  </p>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">remaining</p>
+                </div>
+              </div>
+              {/* Progress Bar */}
+              <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                <div
+                  className="bg-gradient-primary h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min(nutritionSummary?.caloriesProgress || 0, 100)}%` }}
+                ></div>
+              </div>
+              <p className="text-slate-500 dark:text-slate-400 text-xs">
+                {nutritionSummary?.caloriesProgress.toFixed(0) || 0}% of daily goal
+              </p>
+            </div>
+
+            {/* Protein Card */}
+            <div className="flex flex-col gap-3 rounded-xl p-6 bg-white dark:bg-slate-800/50 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-primary-start text-3xl">fitness_center</span>
+                  <div>
+                    <p className="text-slate-900 dark:text-white text-base font-semibold">Protein</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm">
+                      {nutritionSummary?.proteinConsumed || 0} / {nutritionSummary?.targetProtein || 0} g
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-slate-900 dark:text-white text-2xl font-bold">
+                    {nutritionSummary?.proteinRemaining || 0}g
+                  </p>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">remaining</p>
+                </div>
+              </div>
+              {/* Progress Bar */}
+              <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                <div
+                  className="bg-gradient-primary h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min(nutritionSummary?.proteinProgress || 0, 100)}%` }}
+                ></div>
+              </div>
+              <p className="text-slate-500 dark:text-slate-400 text-xs">
+                {nutritionSummary?.proteinProgress.toFixed(0) || 0}% of daily goal
+              </p>
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Stats Cards */}
@@ -64,19 +144,12 @@ export default async function Home() {
         <div className="flex flex-col gap-3 rounded-xl p-4 sm:p-6 bg-slate-800/50 dark:bg-slate-800/50 min-w-0">
           <span className="material-symbols-outlined text-primary-start text-2xl sm:text-3xl">footprint</span>
           <p className="text-white text-sm sm:text-base font-normal">Steps</p>
-          <p className="text-white text-xl sm:text-2xl font-bold leading-tight">6,540</p>
+          <p className="text-white text-xl sm:text-2xl font-bold leading-tight">{steps.toLocaleString()}</p>
         </div>
         <div className="flex flex-col gap-3 rounded-xl p-4 sm:p-6 bg-slate-800/50 dark:bg-slate-800/50 min-w-0">
-          <span className="material-symbols-outlined text-primary-start text-2xl sm:text-3xl">local_fire_department</span>
-          <p className="text-white text-sm sm:text-base font-normal">Target Calories</p>
-          <p className="text-white text-xl sm:text-2xl font-bold leading-tight">
-            {targetCalories > 0 ? `${targetCalories.toLocaleString()} kcal` : "—"}
-          </p>
-        </div>
-        <div className="flex flex-col gap-3 rounded-xl p-4 sm:p-6 bg-slate-800/50 dark:bg-slate-800/50 col-span-2 min-w-0">
           <span className="material-symbols-outlined text-primary-start text-2xl sm:text-3xl">timer</span>
           <p className="text-white text-sm sm:text-base font-normal">Active Time</p>
-          <p className="text-white text-xl sm:text-2xl font-bold leading-tight">45 min</p>
+          <p className="text-white text-xl sm:text-2xl font-bold leading-tight">{activeMinutes} min</p>
         </div>
       </div>
 
@@ -94,7 +167,7 @@ export default async function Home() {
               <div className="flex flex-col gap-1">
                 <p className="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal">35 min • Intermediate</p>
               </div>
-              <button className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-gradient-to-r from-primary-start to-primary-end text-white text-sm font-medium leading-normal shadow-[0_4px_15px_0_rgba(244,92,67,0.3)] hover:shadow-[0_4px_20px_0_rgba(235,51,73,0.4)] transition-shadow duration-300">
+              <button className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-gradient-primary text-white text-sm font-medium leading-normal shadow-[0_4px_15px_0_rgba(244,92,67,0.3)] hover:shadow-[0_4px_20px_0_rgba(235,51,73,0.4)] transition-shadow duration-300">
                 <span className="truncate">Start Workout</span>
               </button>
             </div>
@@ -106,26 +179,32 @@ export default async function Home() {
       <div className="flex flex-wrap gap-4 px-4 py-2">
         <div className="flex min-w-72 flex-1 flex-col gap-2 rounded-xl bg-white dark:bg-slate-800/50 p-6 shadow-sm">
           <p className="text-slate-900 dark:text-white text-base font-medium leading-normal">Weekly Activity</p>
-          <p className="text-slate-900 dark:text-white tracking-light text-[32px] font-bold leading-tight truncate">320 min</p>
+          <p className="text-slate-900 dark:text-white tracking-light text-[32px] font-bold leading-tight truncate">
+            {weeklyActivity.totalMinutes} min
+          </p>
           <div className="flex gap-1">
             <p className="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal">Last 7 Days</p>
-            <p className="text-green-500 dark:text-green-400 text-base font-medium leading-normal">+15%</p>
           </div>
           <div className="grid min-h-[180px] grid-flow-col gap-4 grid-rows-[1fr_auto] items-end justify-items-center pt-4">
-            <div className="w-full rounded-t-lg bg-gradient-to-t from-primary-start/20 to-primary-end/20 dark:from-primary-start/30 dark:to-primary-end/30" style={{height: '40%'}}></div>
-            <p className="text-slate-500 dark:text-slate-400 text-[13px] font-bold leading-normal">Mon</p>
-            <div className="w-full rounded-t-lg bg-gradient-to-t from-primary-start/20 to-primary-end/20 dark:from-primary-start/30 dark:to-primary-end/30" style={{height: '70%'}}></div>
-            <p className="text-slate-500 dark:text-slate-400 text-[13px] font-bold leading-normal">Tue</p>
-            <div className="w-full rounded-t-lg bg-gradient-to-t from-primary-start/20 to-primary-end/20 dark:from-primary-start/30 dark:to-primary-end/30" style={{height: '50%'}}></div>
-            <p className="text-slate-500 dark:text-slate-400 text-[13px] font-bold leading-normal">Wed</p>
-            <div className="w-full rounded-t-lg bg-gradient-to-t from-primary-start to-primary-end" style={{height: '85%'}}></div>
-            <p className="text-transparent bg-clip-text bg-gradient-to-r from-primary-start to-primary-end text-[13px] font-bold leading-normal">Thu</p>
-            <div className="w-full rounded-t-lg bg-gradient-to-t from-primary-start/20 to-primary-end/20 dark:from-primary-start/30 dark:to-primary-end/30" style={{height: '50%'}}></div>
-            <p className="text-slate-500 dark:text-slate-400 text-[13px] font-bold leading-normal">Fri</p>
-            <div className="w-full rounded-t-lg bg-gradient-to-t from-primary-start/20 to-primary-end/20 dark:from-primary-start/30 dark:to-primary-end/30" style={{height: '60%'}}></div>
-            <p className="text-slate-500 dark:text-slate-400 text-[13px] font-bold leading-normal">Sat</p>
-            <div className="w-full rounded-t-lg bg-gradient-to-t from-primary-start/20 to-primary-end/20 dark:from-primary-start/30 dark:to-primary-end/30" style={{height: '30%'}}></div>
-            <p className="text-slate-500 dark:text-slate-400 text-[13px] font-bold leading-normal">Sun</p>
+            {weeklyActivity.weekData.map((day, index) => (
+              <div key={index} className="flex flex-col items-center gap-1 w-full">
+                <div 
+                  className={`w-full rounded-t-lg ${
+                    day.isToday 
+                      ? "bg-gradient-primary-t" 
+                      : "bg-gradient-primary-t opacity-20 dark:opacity-30"
+                  }`}
+                  style={{height: `${Math.max(day.percentage, 5)}%`}}
+                ></div>
+                <p className={`text-[13px] font-bold leading-normal ${
+                  day.isToday 
+                    ? "text-gradient-primary" 
+                    : "text-slate-500 dark:text-slate-400"
+                }`}>
+                  {day.dayName}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

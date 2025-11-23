@@ -34,7 +34,7 @@ export default function Exercises() {
 
         {/* Category Filters */}
         <div className="flex gap-3 px-4 py-3 overflow-x-auto">
-          <button className="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-gradient-to-r from-primary-start to-primary-end px-4 shadow-md">
+          <button className="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-gradient-primary px-4 shadow-md">
             <p className="text-white text-sm font-medium leading-normal">All</p>
           </button>
           <button className="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800/50 px-4">

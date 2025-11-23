@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { prisma } from "@/lib/prisma"
-import bcrypt from "bcryptjs"
+import { changePassword } from "@/lib/services/user.service"
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,56 +15,7 @@ export async function POST(req: NextRequest) {
 
     const { currentPassword, newPassword } = await req.json()
 
-    if (!currentPassword || !newPassword) {
-      return NextResponse.json(
-        { error: "Current password and new password are required" },
-        { status: 400 }
-      )
-    }
-
-    if (newPassword.length < 6) {
-      return NextResponse.json(
-        { error: "New password must be at least 6 characters long" },
-        { status: 400 }
-      )
-    }
-
-    // Get user with password
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        id: true,
-        password: true,
-      },
-    })
-
-    if (!user || !user.password) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      )
-    }
-
-    // Verify current password
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password)
-
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: "Current password is incorrect" },
-        { status: 400 }
-      )
-    }
-
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10)
-
-    // Update password
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: {
-        password: hashedPassword,
-      },
-    })
+    await changePassword(session.user.id, currentPassword, newPassword)
 
     return NextResponse.json(
       { message: "Password changed successfully" },
@@ -73,6 +23,15 @@ export async function POST(req: NextRequest) {
     )
   } catch (error) {
     console.error("Password change error:", error)
+
+    // Handle validation errors
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      )
+    }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -59,7 +59,7 @@ export default function Login() {
           className="h-full w-full bg-cover bg-center bg-no-repeat opacity-20"
           style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCM5kQzxx3U0AoarNMnmrCFXQkTIU1iTAREO52u_ybKEeEQbramnFy8SdDcQ0tkh_V1Z1VUCOIdQo9mTL3_is0x9ZK4xUqABTPWhaaxEQJSJXlSn1nXFApBEP4CU_9pgaFUrnmjLFJmdKbpfqPaWaq63ptw9jfKuuWmJkGU09-IqSQ7acp-moIYN2GGEFPcdECFRVhgHKwmQOBQCIaqVBbJerb8Suhq4PQ7FZRS-Qcq6vN2uFd0EdAcEF1ilGxoF7yyt82vHScn9iI")'}}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/80 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-overlay"></div>
       </div>
 
       <div className="relative z-10 flex w-full max-w-md flex-col items-center">
@@ -122,7 +122,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex items-center justify-center whitespace-nowrap h-14 w-full rounded-lg bg-gradient-to-r from-primary-start to-primary-end text-white text-base font-bold leading-normal mt-4 transition-transform duration-200 ease-in-out hover:scale-[1.02] shadow-[0_4px_15px_0_rgba(244,92,67,0.3)] hover:shadow-[0_4px_20px_0_rgba(235,51,73,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center whitespace-nowrap h-14 w-full rounded-lg bg-gradient-primary text-white text-base font-bold leading-normal mt-4 transition-transform duration-200 ease-in-out hover:scale-[1.02] shadow-[0_4px_15px_0_rgba(244,92,67,0.3)] hover:shadow-[0_4px_20px_0_rgba(235,51,73,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Logging in..." : "Login"}
             </button>

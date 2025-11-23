@@ -22,15 +22,15 @@ export default function Progress() {
       {/* Time Period Selector */}
       <div className="flex px-4 py-3">
         <div className="flex h-10 flex-1 items-center justify-center rounded-lg bg-slate-200 dark:bg-slate-800/50 p-1">
-          <label className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-white has-[:checked]:dark:bg-slate-800 has-[:checked]:shadow-sm has-[:checked]:text-slate-900 has-[:checked]:dark:text-white text-slate-500 dark:text-slate-400 text-sm font-medium leading-normal transition-colors duration-200">
+          <label className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-checked:bg-white has-checked:dark:bg-slate-800 has-checked:shadow-sm has-checked:text-slate-900 has-checked:dark:text-white text-slate-500 dark:text-slate-400 text-sm font-medium leading-normal transition-colors duration-200">
             <span className="truncate">Week</span>
             <input checked className="invisible w-0" name="timeframe-selector" type="radio" value="Week" />
           </label>
-          <label className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-white has-[:checked]:dark:bg-slate-800 has-[:checked]:shadow-sm has-[:checked]:text-slate-900 has-[:checked]:dark:text-white text-slate-500 dark:text-slate-400 text-sm font-medium leading-normal transition-colors duration-200">
+          <label className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-checked:bg-white has-checked:dark:bg-slate-800 has-checked:shadow-sm has-checked:text-slate-900 has-checked:dark:text-white text-slate-500 dark:text-slate-400 text-sm font-medium leading-normal transition-colors duration-200">
             <span className="truncate">Month</span>
             <input className="invisible w-0" name="timeframe-selector" type="radio" value="Month" />
           </label>
-          <label className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-white has-[:checked]:dark:bg-slate-800 has-[:checked]:shadow-sm has-[:checked]:text-slate-900 has-[:checked]:dark:text-white text-slate-500 dark:text-slate-400 text-sm font-medium leading-normal transition-colors duration-200">
+          <label className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-checked:bg-white has-checked:dark:bg-slate-800 has-checked:shadow-sm has-checked:text-slate-900 has-checked:dark:text-white text-slate-500 dark:text-slate-400 text-sm font-medium leading-normal transition-colors duration-200">
             <span className="truncate">Year</span>
             <input className="invisible w-0" name="timeframe-selector" type="radio" value="Year" />
           </label>
@@ -106,7 +106,7 @@ export default function Progress() {
                 <circle className="-rotate-90 origin-center transform" cx="50" cy="50" fill="transparent" r="45" stroke="url(#stepsGradient)" strokeDasharray="283" strokeDashoffset="56.6" strokeLinecap="round" strokeWidth="10"></circle>
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-br from-primary-start to-primary-end text-3xl">directions_walk</span>
+                <span className="material-symbols-outlined text-gradient-primary text-3xl">directions_walk</span>
               </div>
             </div>
             <p className="text-slate-900 dark:text-white text-sm font-bold">8,450</p>
@@ -148,8 +148,8 @@ export default function Progress() {
       {/* Achievements List */}
       <div className="flex flex-col gap-3 px-4 py-2">
         <div className="flex items-center gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary-start/20 to-primary-end/20">
-            <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-br from-primary-start to-primary-end text-3xl">emoji_events</span>
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-primary-br opacity-20">
+            <span className="material-symbols-outlined text-gradient-primary text-3xl">emoji_events</span>
           </div>
           <div className="flex-1">
             <p className="font-medium text-slate-900 dark:text-white">New Personal Record: 5k Run</p>

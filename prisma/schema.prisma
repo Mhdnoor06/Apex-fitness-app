@@ -17,7 +17,7 @@ model User {
   emailVerified DateTime?
   password      String
   image         String?
-  
+
   // Onboarding data
   gender            String?
   age               Int?
@@ -30,9 +30,13 @@ model User {
   targetCalories    Int?
   targetProtein     Int?
   onboardingCompleted Boolean @default(false)
-  
+
   accounts      Account[]
   sessions      Session[]
+  activities    Activity[]
+  nutrition     Nutrition[]
+  meals         Meal[]
+  mealTemplates MealTemplate[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -70,4 +74,82 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime @default(now())
+  steps       Int      @default(0)
+  activeMinutes Int   @default(0) // in minutes
+  caloriesBurned Int?  // optional calories burned
+  distance   Float?   // in km, optional
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model Nutrition {
+  id              String   @id @default(cuid())
+  userId          String
+  date            DateTime @default(now())
+  caloriesConsumed Int     @default(0)
+  proteinConsumed  Int     @default(0)
+  carbsConsumed    Int?    @default(0)
+  fatConsumed      Int?    @default(0)
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model Meal {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  mealType    String   // breakfast, lunch, dinner, snack
+  calories    Int
+  protein     Int
+  carbs       Int
+  fat         Int
+  servingSize String?  // e.g., "1 cup", "100g"
+  notes       String?
+  barcode     String?  // For barcode-scanned items
+  loggedAt    DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, loggedAt])
+}
+
+model MealTemplate {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  calories    Int
+  protein     Int
+  carbs       Int
+  fat         Int
+  servingSize String?
+  isFavorite  Boolean  @default(false)
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
 }

@@ -15,7 +15,7 @@ export function BottomNavigation() {
           href="/"
           className={`inline-flex flex-col items-center justify-center px-5 transition-colors ${
             isActive("/")
-              ? "text-transparent bg-clip-text bg-gradient-to-r from-primary-start to-primary-end"
+              ? "text-gradient-primary"
               : "text-slate-500 dark:text-slate-400 hover:text-primary-start"
           }`}
         >
@@ -26,7 +26,7 @@ export function BottomNavigation() {
           href="/workouts"
           className={`inline-flex flex-col items-center justify-center px-5 transition-colors ${
             isActive("/workouts")
-              ? "text-transparent bg-clip-text bg-gradient-to-r from-primary-start to-primary-end"
+              ? "text-gradient-primary"
               : "text-slate-500 dark:text-slate-400 hover:text-primary-start"
           }`}
         >
@@ -37,7 +37,7 @@ export function BottomNavigation() {
           href="/progress"
           className={`inline-flex flex-col items-center justify-center px-5 transition-colors ${
             isActive("/progress")
-              ? "text-transparent bg-clip-text bg-gradient-to-r from-primary-start to-primary-end"
+              ? "text-gradient-primary"
               : "text-slate-500 dark:text-slate-400 hover:text-primary-start"
           }`}
         >
@@ -48,7 +48,7 @@ export function BottomNavigation() {
           href="/exercises"
           className={`inline-flex flex-col items-center justify-center px-5 transition-colors ${
             isActive("/exercises")
-              ? "text-transparent bg-clip-text bg-gradient-to-r from-primary-start to-primary-end"
+              ? "text-gradient-primary"
               : "text-slate-500 dark:text-slate-400 hover:text-primary-start"
           }`}
         >
@@ -59,7 +59,7 @@ export function BottomNavigation() {
           href="/profile"
           className={`inline-flex flex-col items-center justify-center px-5 transition-colors ${
             isActive("/profile")
-              ? "text-transparent bg-clip-text bg-gradient-to-r from-primary-start to-primary-end"
+              ? "text-gradient-primary"
               : "text-slate-500 dark:text-slate-400 hover:text-primary-start"
           }`}
         >

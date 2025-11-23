@@ -14,9 +14,10 @@ export default auth((req) => {
   const isOnApiAuth = nextUrl.pathname.startsWith("/api/auth")
   const isOnApiOnboarding = nextUrl.pathname.startsWith("/api/onboarding")
   const isOnApiProfile = nextUrl.pathname.startsWith("/api/profile")
+  const isOnApiActivity = nextUrl.pathname.startsWith("/api/activity")
 
   // Allow access to login, signup, forgot password, onboarding, and API routes
-  if (isOnLogin || isOnSignup || isOnForgotPassword || isOnOnboarding || isOnApiAuth || isOnApiOnboarding || isOnApiProfile) {
+  if (isOnLogin || isOnSignup || isOnForgotPassword || isOnOnboarding || isOnApiAuth || isOnApiOnboarding || isOnApiProfile || isOnApiActivity) {
     if (isLoggedIn && (isOnLogin || isOnSignup || isOnForgotPassword)) {
       // Redirect to home if already logged in
       return Response.redirect(new URL("/", nextUrl))

@@ -67,7 +67,7 @@ export default async function Profile() {
         <div className="w-10"></div>
       </div>
 
-      <div className="flex-grow px-4">
+            <div className="grow px-4">
         {/* Profile Header */}
         <div className="flex p-4 @container justify-center">
           <div className="flex w-full flex-col gap-4 items-center">
@@ -76,7 +76,7 @@ export default async function Profile() {
                 className="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32 border-4 border-primary-start/20"
                 style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCj148qWqIyn-AARVxLt9Z5Px4Pooil4zSrobG-2LjlDMjyUQwFOQZOaXzTGs-hDQbhhns_2zpjBAykZt7gsnuZT_fQNdDTe0BWNT0s4bnEYWP_lY3GzNACYbuwnYzUxcI4ggHgHgKxZ8qBA2FopNUdsaEJnrWUGyCtIvIEjX8pnwW1fV_qjyGUSqYdTEmo6B7P15NHFRfUy7Q6hmFOG2NXxVnuKf0R2YHnaiWQACzvEFeKKoEzFsmEd8fHj7ZWzKovktAkdWcrmGM")'}}
               />
-              <button className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-primary-start to-primary-end text-white">
+              <button className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary text-white">
                 <span className="material-symbols-outlined text-base">edit</span>
               </button>
             </div>
@@ -181,8 +181,8 @@ export default async function Profile() {
             <div className="bg-white dark:bg-slate-900/40 rounded-xl overflow-hidden">
               <Link href="/profile/edit" className="flex items-center gap-4 px-4 min-h-14 justify-between border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                 <div className="flex items-center gap-4">
-                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-to-br from-primary-start/20 to-primary-end/20 shrink-0 size-10">
-                    <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-br from-primary-start to-primary-end">person</span>
+                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-primary-br opacity-20 shrink-0 size-10">
+                    <span className="material-symbols-outlined text-gradient-primary">person</span>
                   </div>
                   <p className="text-slate-800 dark:text-white text-base font-normal leading-normal flex-1 truncate">
                     Edit Profile
@@ -196,8 +196,8 @@ export default async function Profile() {
               </Link>
               <Link href="/profile/change-password" className="flex items-center gap-4 px-4 min-h-14 justify-between border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                 <div className="flex items-center gap-4">
-                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-to-br from-primary-start/20 to-primary-end/20 shrink-0 size-10">
-                    <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-br from-primary-start to-primary-end">lock</span>
+                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-primary-br opacity-20 shrink-0 size-10">
+                    <span className="material-symbols-outlined text-gradient-primary">lock</span>
                   </div>
                   <p className="text-slate-800 dark:text-white text-base font-normal leading-normal flex-1 truncate">
                     Change Password
@@ -211,8 +211,8 @@ export default async function Profile() {
               </Link>
               <div className="flex items-center gap-4 px-4 min-h-14 justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-to-br from-primary-start/20 to-primary-end/20 shrink-0 size-10">
-                    <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-br from-primary-start to-primary-end">link</span>
+                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-primary-br opacity-20 shrink-0 size-10">
+                    <span className="material-symbols-outlined text-gradient-primary">link</span>
                   </div>
                   <p className="text-slate-800 dark:text-white text-base font-normal leading-normal flex-1 truncate">
                     Connected Accounts
@@ -235,8 +235,8 @@ export default async function Profile() {
             <div className="bg-white dark:bg-slate-900/40 rounded-xl overflow-hidden">
               <div className="flex items-center gap-4 px-4 min-h-14 justify-between border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-4">
-                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-to-br from-primary-start/20 to-primary-end/20 shrink-0 size-10">
-                    <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-br from-primary-start to-primary-end">notifications</span>
+                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-primary-br opacity-20 shrink-0 size-10">
+                    <span className="material-symbols-outlined text-gradient-primary">notifications</span>
                   </div>
                   <p className="text-slate-800 dark:text-white text-base font-normal leading-normal flex-1 truncate">
                     Notifications
@@ -250,8 +250,8 @@ export default async function Profile() {
               </div>
               <div className="flex items-center gap-4 px-4 min-h-14 justify-between border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-4">
-                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-to-br from-primary-start/20 to-primary-end/20 shrink-0 size-10">
-                    <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-br from-primary-start to-primary-end">straighten</span>
+                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-primary-br opacity-20 shrink-0 size-10">
+                    <span className="material-symbols-outlined text-gradient-primary">straighten</span>
                   </div>
                   <p className="text-slate-800 dark:text-white text-base font-normal leading-normal flex-1 truncate">
                     Units of Measurement
@@ -265,8 +265,8 @@ export default async function Profile() {
               </div>
               <div className="flex items-center gap-4 px-4 min-h-14 justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-to-br from-primary-start/20 to-primary-end/20 shrink-0 size-10">
-                    <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-br from-primary-start to-primary-end">dark_mode</span>
+                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-primary-br opacity-20 shrink-0 size-10">
+                    <span className="material-symbols-outlined text-gradient-primary">dark_mode</span>
                   </div>
                   <p className="text-slate-800 dark:text-white text-base font-normal leading-normal flex-1 truncate">
                     Dark Mode
@@ -280,7 +280,7 @@ export default async function Profile() {
                       className="peer sr-only" 
                       type="checkbox" 
                     />
-                    <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-gradient-to-r peer-checked:from-primary-start peer-checked:to-primary-end peer-checked:after:translate-x-full peer-checked:after:border-white rtl:peer-checked:after:-translate-x-full dark:border-slate-600 dark:bg-slate-700"></div>
+                    <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-gradient-primary peer-checked:after:translate-x-full peer-checked:after:border-white rtl:peer-checked:after:-translate-x-full dark:border-slate-600 dark:bg-slate-700"></div>
                   </label>
                 </div>
               </div>
@@ -295,8 +295,8 @@ export default async function Profile() {
             <div className="bg-white dark:bg-slate-900/40 rounded-xl overflow-hidden">
               <div className="flex items-center gap-4 px-4 min-h-14 justify-between border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-4">
-                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-to-br from-primary-start/20 to-primary-end/20 shrink-0 size-10">
-                    <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-br from-primary-start to-primary-end">help_outline</span>
+                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-primary-br opacity-20 shrink-0 size-10">
+                    <span className="material-symbols-outlined text-gradient-primary">help_outline</span>
                   </div>
                   <p className="text-slate-800 dark:text-white text-base font-normal leading-normal flex-1 truncate">
                     Help &amp; Support
@@ -310,8 +310,8 @@ export default async function Profile() {
               </div>
               <div className="flex items-center gap-4 px-4 min-h-14 justify-between border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-4">
-                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-to-br from-primary-start/20 to-primary-end/20 shrink-0 size-10">
-                    <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-br from-primary-start to-primary-end">privacy_tip</span>
+                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-primary-br opacity-20 shrink-0 size-10">
+                    <span className="material-symbols-outlined text-gradient-primary">privacy_tip</span>
                   </div>
                   <p className="text-slate-800 dark:text-white text-base font-normal leading-normal flex-1 truncate">
                     Privacy Policy
@@ -325,8 +325,8 @@ export default async function Profile() {
               </div>
               <div className="flex items-center gap-4 px-4 min-h-14 justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-to-br from-primary-start/20 to-primary-end/20 shrink-0 size-10">
-                    <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-br from-primary-start to-primary-end">gavel</span>
+                  <div className="text-white flex items-center justify-center rounded-lg bg-gradient-primary-br opacity-20 shrink-0 size-10">
+                    <span className="material-symbols-outlined text-gradient-primary">gavel</span>
                   </div>
                   <p className="text-slate-800 dark:text-white text-base font-normal leading-normal flex-1 truncate">
                     Terms of Service
