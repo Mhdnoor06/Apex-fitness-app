@@ -31,10 +31,14 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased" style={{fontFamily: 'Inter, sans-serif'}} suppressHydrationWarning>
+      <body className="antialiased h-full overflow-hidden" style={{fontFamily: 'Inter, sans-serif'}} suppressHydrationWarning>
         <Providers>
-          {children}
-          <LayoutNavigation />
+          <div className="h-full flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+              {children}
+            </div>
+            <LayoutNavigation />
+          </div>
         </Providers>
       </body>
     </html>

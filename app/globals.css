@@ -19,8 +19,14 @@
   color-scheme: dark;
 }
 
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
-  min-height: max(884px, 100dvh);
+  height: 100%;
+  overflow: hidden;
   font-family: var(--font-inter), sans-serif;
 }
 
@@ -54,4 +60,13 @@ body {
 
 .bg-gradient-overlay {
   background: linear-gradient(to top, var(--color-background-dark), color-mix(in srgb, var(--color-background-dark) 80%, transparent), transparent);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

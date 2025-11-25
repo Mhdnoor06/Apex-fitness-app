@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { BrowserMultiFormatReader, NotFoundException } from "@zxing/library";
 
 export default function ScannerPage() {
   const router = useRouter();
@@ -11,39 +12,82 @@ export default function ScannerPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [manualInput, setManualInput] = useState(false);
+  const [detectedCode, setDetectedCode] = useState("");
+  const [scanStatus, setScanStatus] = useState("Ready to scan");
+  const [scanAttempts, setScanAttempts] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
 
   const startCamera = async () => {
     try {
       setError("");
-      console.log("Starting camera...");
+      setDetectedCode("");
+      console.log("Starting barcode scanner...");
 
-      // Set scanning to true first to show video element
       setScanning(true);
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "environment",
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        },
-      });
+      // Initialize the barcode reader with better settings
+      if (!codeReaderRef.current) {
+        codeReaderRef.current = new BrowserMultiFormatReader();
+      }
 
-      console.log("Camera stream obtained:", stream);
-      streamRef.current = stream;
+      const codeReader = codeReaderRef.current;
 
+      // Configure hints for better detection
+      const hints = new Map();
+      hints.set(2, true); // Enable EAN_13
+      hints.set(3, true); // Enable EAN_8
+      hints.set(4, true); // Enable UPC_A
+      hints.set(5, true); // Enable UPC_E
+      codeReader.hints = hints;
+
+      // Get available video devices
+      const videoDevices = await codeReader.listVideoInputDevices();
+      console.log("Video devices:", videoDevices);
+
+      if (videoDevices.length === 0) {
+        throw new Error("No camera found on device");
+      }
+
+      // Prefer back camera (environment facing)
+      const selectedDevice = videoDevices.find(device =>
+        device.label.toLowerCase().includes('back') ||
+        device.label.toLowerCase().includes('environment')
+      ) || videoDevices[0];
+
+      console.log("Using camera:", selectedDevice.label);
+
+      // Start decoding from video device
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        console.log("Video srcObject set");
+        setScanStatus("Scanning... Point at barcode");
 
-        // Play the video
-        try {
-          await videoRef.current.play();
-          console.log("Video playing");
-        } catch (playError) {
-          console.error("Error playing video:", playError);
-        }
+        codeReader.decodeFromVideoDevice(
+          selectedDevice.deviceId,
+          videoRef.current,
+          (result, err) => {
+            // Increment scan attempts to show activity
+            setScanAttempts(prev => prev + 1);
+
+            if (result) {
+              const code = result.getText();
+              console.log("✓ Barcode detected:", code);
+              setDetectedCode(code);
+              setScanStatus("Barcode found!");
+
+              // Auto-lookup after detection
+              setTimeout(() => {
+                stopCamera();
+                lookupBarcode(code);
+              }, 500); // Small delay to show success message
+            }
+
+            if (err && !(err instanceof NotFoundException)) {
+              console.error("Decode error:", err);
+              setScanStatus("Scanning... Move closer to barcode");
+            }
+          }
+        );
       }
     } catch (err) {
       console.error("Camera error:", err);
@@ -54,10 +98,17 @@ export default function ScannerPage() {
   };
 
   const stopCamera = () => {
+    // Stop ZXing reader
+    if (codeReaderRef.current) {
+      codeReaderRef.current.reset();
+    }
+
+    // Stop media stream
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
+
     setScanning(false);
   };
 
@@ -70,7 +121,9 @@ export default function ScannerPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to lookup barcode");
+        // Show detailed error message
+        const errorMsg = data.message || data.error || "Failed to lookup barcode";
+        throw new Error(errorMsg);
       }
 
       if (data.product) {
@@ -102,8 +155,14 @@ export default function ScannerPage() {
   };
 
   useEffect(() => {
+    // Cleanup on unmount
     return () => {
-      stopCamera();
+      if (codeReaderRef.current) {
+        codeReaderRef.current.reset();
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
     };
   }, []);
 
@@ -164,9 +223,15 @@ export default function ScannerPage() {
                   </div>
                 </div>
                 <div className="absolute bottom-4 left-0 right-0 text-center">
-                  <p className="text-white text-sm bg-black/50 px-4 py-2 rounded-full inline-block">
-                    Align barcode within frame
-                  </p>
+                  {detectedCode ? (
+                    <p className="text-white text-sm bg-green-500 px-4 py-2 rounded-full inline-block font-semibold">
+                      ✓ Barcode detected: {detectedCode}
+                    </p>
+                  ) : (
+                    <p className="text-white text-sm bg-black/50 px-4 py-2 rounded-full inline-block">
+                      Align barcode within frame
+                    </p>
+                  )}
                 </div>
               </div>
             ) : (
@@ -283,6 +348,15 @@ export default function ScannerPage() {
                   Error
                 </p>
                 <p className="text-xs text-red-700 dark:text-red-300">{error}</p>
+                {error.includes("not in our database") && (
+                  <button
+                    onClick={() => router.push("/nutrition")}
+                    className="mt-3 w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-primary text-white px-4 py-2 text-sm font-medium"
+                  >
+                    <span className="material-symbols-outlined text-base">add_circle</span>
+                    Add Food Manually
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -302,11 +376,15 @@ export default function ScannerPage() {
             </li>
             <li className="flex gap-2 text-xs text-slate-600 dark:text-slate-400">
               <span className="material-symbols-outlined text-base">check_circle</span>
-              <span>Hold phone steady and align barcode in frame</span>
+              <span>Hold phone steady 4-6 inches from barcode</span>
             </li>
             <li className="flex gap-2 text-xs text-slate-600 dark:text-slate-400">
               <span className="material-symbols-outlined text-base">check_circle</span>
-              <span>If scanning fails, try entering the numbers manually</span>
+              <span>Try different angles and distances if not detecting</span>
+            </li>
+            <li className="flex gap-2 text-xs text-slate-600 dark:text-slate-400">
+              <span className="material-symbols-outlined text-base">check_circle</span>
+              <span>Some products may not be in the database - add them manually</span>
             </li>
           </ul>
         </div>

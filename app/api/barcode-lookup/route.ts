@@ -45,9 +45,21 @@ export async function GET(req: NextRequest) {
       }
     );
 
+    // Handle 404 - product not found in database
+    if (response.status === 404) {
+      return NextResponse.json(
+        {
+          error: "Product not found in database",
+          message: `Barcode ${code} is not in our database. Please add this food manually from the Nutrition page.`,
+          notFound: true
+        },
+        { status: 404 }
+      );
+    }
+
     if (!response.ok) {
       return NextResponse.json(
-        { error: "Failed to fetch product data" },
+        { error: "Failed to fetch product data from database" },
         { status: response.status }
       );
     }
@@ -56,7 +68,11 @@ export async function GET(req: NextRequest) {
 
     if (data.status === 0 || !data.product) {
       return NextResponse.json(
-        { error: "Product not found. Try entering the barcode manually or add the meal manually." },
+        {
+          error: "Product not found in database",
+          message: `Barcode ${code} is not in our database. Please add this food manually from the Nutrition page.`,
+          notFound: true
+        },
         { status: 404 }
       );
     }

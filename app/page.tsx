@@ -2,6 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { getUserProfile } from "@/lib/services/user.service";
+
+
+
+
+
+
 import { getTodayActivity, getWeeklyActivitySummary } from "@/lib/services/activity.service";
 import { getTodayNutritionSummary } from "@/lib/services/nutrition.service";
 import { HomeHeader } from "@/components/home-header";

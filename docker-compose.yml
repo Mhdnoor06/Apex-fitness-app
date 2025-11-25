@@ -1,24 +1,52 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
   postgres:
     image: postgres:16-alpine
     container_name: my-fitness-pro-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: fitness_user
-      POSTGRES_PASSWORD: fitness_password
-      POSTGRES_DB: fitness_db
+      POSTGRES_USER: ${POSTGRES_USER:-fitness_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fitness_password}
+      POSTGRES_DB: ${POSTGRES_DB:-fitness_db}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U fitness_user"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fitness_user}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - fitness-network
+
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my-fitness-pro-app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-fitness_user}:${POSTGRES_PASSWORD:-fitness_password}@postgres:5432/${POSTGRES_DB:-fitness_db}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NODE_ENV=production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - fitness-network
+    command: sh -c "npx prisma migrate deploy && node server.js"
 
 volumes:
   postgres_data:
+
+networks:
+  fitness-network:
+    driver: bridge
 

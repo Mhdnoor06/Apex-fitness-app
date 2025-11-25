@@ -1,119 +1,379 @@
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Exercise Library - FitFlow",
-  description: "Browse and search through our comprehensive exercise library",
-};
+import { useEffect, useState } from "react";
+
+interface Exercise {
+  id: string;
+  name: string;
+  description?: string;
+  category: string;
+  difficulty: string;
+  equipment?: string;
+  imageUrl?: string;
+  muscleGroups: string[];
+  instructions?: string;
+  videoUrl?: string;
+}
 
 export default function Exercises() {
-  return (
-    <div className="relative flex h-auto min-h-screen w-full flex-col">
-      <main className="flex-1 pb-24">
-        {/* Header */}
-        <div className="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
-          <h1 className="text-slate-900 dark:text-white text-2xl font-bold leading-tight tracking-[-0.015em] flex-1">Exercise Library</h1>
-          <div className="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-end">
-            <span className="material-symbols-outlined text-2xl">tune</span>
-          </div>
-        </div>
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
-        {/* Search Bar */}
-        <div className="px-4 py-3">
+  const categories = [
+    { value: "chest", label: "Chest", icon: "favorite", gradient: "from-red-500 to-pink-500" },
+    { value: "back", label: "Back", icon: "fitness_center", gradient: "from-blue-500 to-cyan-500" },
+    { value: "legs", label: "Legs", icon: "directions_run", gradient: "from-green-500 to-emerald-500" },
+    { value: "shoulders", label: "Shoulders", icon: "accessibility", gradient: "from-orange-500 to-amber-500" },
+    { value: "arms", label: "Arms", icon: "sports_martial_arts", gradient: "from-purple-500 to-violet-500" },
+    { value: "core", label: "Core", icon: "emergency", gradient: "from-yellow-500 to-orange-500" },
+    { value: "cardio", label: "Cardio", icon: "speed", gradient: "from-red-600 to-rose-500" },
+    { value: "flexibility", label: "Flexibility", icon: "self_improvement", gradient: "from-indigo-500 to-purple-500" },
+  ];
+
+  useEffect(() => {
+    fetchExercises();
+  }, []);
+
+  const fetchExercises = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/exercises");
+      const data = await response.json();
+
+      if (response.ok) {
+        setExercises(data.exercises);
+      }
+    } catch (error) {
+      console.error("Error fetching exercises:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getExercisesByCategory = (category: string) => {
+    let filtered = exercises.filter((ex) => ex.category === category);
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      filtered = filtered.filter((ex) =>
+        ex.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    return filtered;
+  };
+
+  const getCategoryCount = (category: string) => {
+    return exercises.filter((ex) => ex.category === category).length;
+  };
+
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(category);
+    setSearchQuery(""); // Clear search when selecting category
+  };
+
+  const handleBackToCategories = () => {
+    setSelectedCategory(null);
+    setSearchQuery("");
+  };
+
+  const handleExerciseClick = (exercise: Exercise) => {
+    setSelectedExercise(exercise);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setTimeout(() => setSelectedExercise(null), 300);
+  };
+
+  const categoryExercises = selectedCategory ? getExercisesByCategory(selectedCategory) : [];
+  const selectedCategoryInfo = categories.find((c) => c.value === selectedCategory);
+
+  return (
+    <div className="relative flex h-full w-full flex-col bg-background-light dark:bg-background-dark overflow-hidden">
+      {/* Header - Fixed at top */}
+      <div className="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between shrink-0 z-10">
+        {selectedCategory ? (
+          <button
+            onClick={handleBackToCategories}
+            className="flex items-center gap-2 text-slate-900 dark:text-white"
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
+            <h1 className="text-2xl font-bold leading-tight tracking-[-0.015em] capitalize">
+              {selectedCategory}
+            </h1>
+          </button>
+        ) : (
+          <h1 className="text-slate-900 dark:text-white text-2xl font-bold leading-tight tracking-[-0.015em] flex-1">
+            Exercise Library
+          </h1>
+        )}
+        <div className="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-end">
+          <span className="material-symbols-outlined text-2xl">tune</span>
+        </div>
+      </div>
+
+      {/* Search Bar - Only show when category is selected, Fixed */}
+      {selectedCategory && (
+        <div className="px-4 py-3 shrink-0">
           <label className="flex flex-col min-w-40 h-12 w-full">
             <div className="flex w-full flex-1 items-stretch rounded-xl h-full">
               <div className="text-slate-400 dark:text-slate-400 flex bg-white dark:bg-slate-800/50 items-center justify-center pl-4 rounded-l-xl border-r-0">
                 <span className="material-symbols-outlined">search</span>
               </div>
               <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-white dark:bg-slate-800/50 focus:border-none h-full placeholder:text-slate-400 dark:placeholder:text-slate-400 px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal"
                 placeholder="Search exercises..."
               />
             </div>
           </label>
         </div>
+      )}
 
-        {/* Category Filters */}
-        <div className="flex gap-3 px-4 py-3 overflow-x-auto">
-          <button className="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-gradient-primary px-4 shadow-md">
-            <p className="text-white text-sm font-medium leading-normal">All</p>
-          </button>
-          <button className="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800/50 px-4">
-            <p className="text-slate-900 dark:text-white text-sm font-medium leading-normal">Chest</p>
-          </button>
-          <button className="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800/50 px-4">
-            <p className="text-slate-900 dark:text-white text-sm font-medium leading-normal">Legs</p>
-          </button>
-          <button className="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800/50 px-4">
-            <p className="text-slate-900 dark:text-white text-sm font-medium leading-normal">Cardio</p>
-          </button>
-          <button className="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800/50 px-4">
-            <p className="text-slate-900 dark:text-white text-sm font-medium leading-normal">Bodyweight</p>
-          </button>
-          <button className="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800/50 px-4">
-            <p className="text-slate-900 dark:text-white text-sm font-medium leading-normal">Back</p>
-          </button>
-        </div>
-
-        {/* Exercise Grid */}
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-4 p-4">
-          <div
-            className="bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-square"
-            style={{backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 60%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDhLti84qtZI7D6FUucd_WW-PrrO-0yW8PpYTdcyN-nrM9Kpd7otOVx-0Hx4yKa-IefTgsjyjwJbHWeHavJtERjmfJtYeBq4FWUyrnXxHrnzTl34wE_Z443N-ddsD3TTGwYVX-zk5bD_1diIy5JlUzrW1FxvASMpoX3Gy8tq6ry6IU6TrzIIpK-BwhxlF2wa0ehXsSSVjfIgcvKvRyEJQOx8v3AP1-sXVFzeTEC70EPeWsGnjUXQKpT3nNEoobJBpiM8gV26Ac7OSo")'}}
-          >
-            <p className="text-white text-base font-bold leading-tight line-clamp-2">Dumbbell Bench Press</p>
+      {/* Scrollable Content Area */}
+      <main className="flex-1 overflow-y-auto min-h-0 pb-20">
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center p-12">
+            <div className="flex flex-col items-center gap-4">
+              <span className="material-symbols-outlined text-4xl text-slate-400 dark:text-slate-500 animate-pulse">
+                fitness_center
+              </span>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">Loading exercises...</p>
+            </div>
           </div>
+        )}
 
-          <div
-            className="bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-square"
-            style={{backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 60%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAYWeSOwOKsqpttZLJH91C39LcPHSRYKlLJWI-G59BucFDj1rtIAMj8B6JMwUFRaD33mteOsUi_mHGjjeGdeAfRZC22ka3Dvkxhkh-Xi9boRVoMDlw1Fk506bq5cuwxSroibK_-xCpczUbbyQRthYG4IiCMY10HtniNckapajl-D93bm7VXwjfp3zT_nr_UCkKwKouFJVT7i-YdmXXqS9RddZBmFYD1TpmW0cPuZPLr7_RT8xL-0ddnGmKCu5BosiaLH1SaYEzoDE4")'}}
-          >
-            <p className="text-white text-base font-bold leading-tight line-clamp-2">Barbell Squat</p>
+        {/* Category Cards Grid - First Level */}
+        {!loading && !selectedCategory && (
+          <div className="grid grid-cols-2 gap-4 p-4">
+            {categories.map((category) => {
+              const count = getCategoryCount(category.value);
+              return (
+                <button
+                  key={category.value}
+                  onClick={() => handleCategoryClick(category.value)}
+                  className={`bg-gradient-to-br ${category.gradient} flex flex-col gap-3 rounded-xl justify-center items-center p-6 aspect-square relative overflow-hidden cursor-pointer hover:scale-105 transition-transform shadow-lg`}
+                >
+                  <span className="material-symbols-outlined text-white text-6xl">
+                    {category.icon}
+                  </span>
+                  <div className="text-center">
+                    <p className="text-white text-lg font-bold leading-tight">
+                      {category.label}
+                    </p>
+                    <p className="text-white/80 text-sm mt-1">
+                      {count} exercises
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
+        )}
 
-          <div
-            className="bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-square"
-            style={{backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 60%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuD4vDDXfLeE1b88rYya8pyK0_xfs9-FfGVLTrzIhMJliHnwKi8DDf5a_BWEJULJ59eSpAx1HWOP0E-2nj1DsNbO9zkez9GQecpI-TRyVX1ihbYlZe4CUY37ekj0qW-N6K3drmxikrRLLQMzCRFRfYURImo6FKmadHU-xX_Tixt5HAokTQ-hnkWMwb0gZeofvK4XdzdTd1aExOa-OdSr_vEfyk1XzrecQ-sheelT_6L6pW0-vcbmlhDEqXv4nxL1kaL5xQYFdlHU6aI")'}}
-          >
-            <p className="text-white text-base font-bold leading-tight line-clamp-2">Deadlift</p>
+        {/* Exercise Grid - Second Level (After selecting category) */}
+        {!loading && selectedCategory && categoryExercises.length > 0 && (
+          <div className="grid grid-cols-2 gap-3 px-4 pb-4">
+            {categoryExercises.map((exercise) => (
+              <button
+                key={exercise.id}
+                onClick={() => handleExerciseClick(exercise)}
+                className="bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-square relative overflow-hidden cursor-pointer hover:scale-105 transition-transform shadow-md"
+                style={{
+                  backgroundImage: exercise.imageUrl
+                    ? `linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 60%), url("${exercise.imageUrl}")`
+                    : `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`,
+                }}
+              >
+                {!exercise.imageUrl && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-white text-6xl opacity-30">
+                      fitness_center
+                    </span>
+                  </div>
+                )}
+                <div className="relative z-10">
+                  <p className="text-white text-base font-bold leading-tight line-clamp-2">
+                    {exercise.name}
+                  </p>
+                  <p className="text-white/80 text-xs mt-1 capitalize">
+                    {exercise.difficulty}
+                  </p>
+                </div>
+              </button>
+            ))}
           </div>
+        )}
 
-          <div
-            className="bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-square"
-            style={{backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 60%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuColZKF7FnxXjqO4h4b_jTWE9-cyI-vQ4pq_qLv6sgJ_mSd4bR7QfExVdf9dF7SMYJQZaiWUeZ12O5vA3-K_fzdnCcyRWZ-x3eLd8q8oSGDpPNmL_pCloON4SC1HZFFZnqw63Qn6jhiQ2Eqj6uKfmAuEJOm_OgJ62Fwiu7ouxnKcjope70L0UWMbZShDI_mIymg9Gf2VETxptLgcyP9lv1UMLL_TiBKHf9nlNsipBQAzljPjTT8j518OiWFOay3R0yQyeZF_anThkM")'}}
-          >
-            <p className="text-white text-base font-bold leading-tight line-clamp-2">Overhead Press</p>
+        {/* Empty State */}
+        {!loading && selectedCategory && categoryExercises.length === 0 && (
+          <div className="flex flex-col items-center justify-center p-12 text-center">
+            <span className="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600 mb-4">
+              search_off
+            </span>
+            <h3 className="text-slate-900 dark:text-white text-lg font-semibold mb-2">
+              No exercises found
+            </h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
+              Try adjusting your search
+            </p>
           </div>
-
-          <div
-            className="bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-square"
-            style={{backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 60%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCVZTcRe4fVvFjnjuf3X1FkvBO0CrU7rx6f_57vbs0f5w0ENoZSMK4kWpxuOy_pFuhigEA79lRNgf24MrC3HMAV0jzRGHRa2Nhnpmd0sAz5hkHDM6Q55U8-E_u_U4unDmJoIVy2SNXDOoo_yH6d7CQKU47KHeI4mGmjWqnyUdQuFIuMAXDJPCITyg5_kmJORmb_4I6GiWbBbzprNC9F7czw6xVn6iepFnTY2op7pyZlB8CAbtnjVfQVt8RIyy7ao2JoHhdmqgpgiVo")'}}
-          >
-            <p className="text-white text-base font-bold leading-tight line-clamp-2">Push Up</p>
-          </div>
-
-          <div
-            className="bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-square"
-            style={{backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 60%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBqdaD6VPRo8_gjekf91qGR3kb270ZVTA4Z2GbZCGGVzfz39HXHS_bEIuHspQCxlGtvcDOrOgM7KNEVBMA7M9NEHYGEtDBTn2KC-IIuqh-Jn15KnsY3BVT4Xu1x3yvRLzLYli56rTwg_chTV7Hge8pzDcvfOWoho182AdBDlc3N3eQM9NqmuyZXlknX-J1XpypsfVq92hvbRunm-lP8DKh4YnV_Chv6E8-WxMCSieCQM3MUmcUuriFtYD80Jn3d-Y8anCZzyHGr2Mg")'}}
-          >
-            <p className="text-white text-base font-bold leading-tight line-clamp-2">Plank</p>
-          </div>
-
-          <div
-            className="bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-square"
-            style={{backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 60%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCqJm9CAJPJfouLBYehE5312uVFzZxo6OW2cfOIdxOyKVl_MIbSUUw8Duqlp_RqzYQlop7ouOVz45b_NWgFn6g7Gax_LdMx6zJpcbXXDmXBZJkpmWjTYaoyIDn9UwrB9ixSmHHoYI5lp34qrbeNLGmP2FefsYTB6163q3B2E2WGN-SA_xP53ZiS0wU39u3rIdKoTqg9MSp8ZNfUNhyMvcapFnnTQ5QjDBh87TR_VnUiQU0shCHSqEQo-6RrVOQ4EBi8XxKGphi-bLw")'}}
-          >
-            <p className="text-white text-base font-bold leading-tight line-clamp-2">Treadmill Run</p>
-          </div>
-
-          <div
-            className="bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-square"
-            style={{backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 60%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCwlB_2NQaSHTBn4pw_ltL9QMO0mjCyFQhPZMEnsTbHj2qJIV-vrsYxj8drwSCz5f1e7Kq3oYCOYhMcBT2PtC49o37b544hYKrlfk30_ft9B1lYbqO2cYnNGq5FbpoV3bDQOIdRlcH4UUclAixrIvrqetnqk87pCQO48pKy1pOZbwQFZ2zcyCdk0iOTP4aqumGwAaCVKfMbkmwR99_NUci_4Ld_veb9myMkEf4fsNzpArKcZ8d6lCpTq7ZmP1gMLULHA7iVM8Z3BBw")'}}
-          >
-            <p className="text-white text-base font-bold leading-tight line-clamp-2">Lunges</p>
-          </div>
-        </div>
+        )}
       </main>
 
+      {/* Exercise Detail Modal - Tutorial Level */}
+      {showModal && selectedExercise && (
+        <div
+          className="fixed inset-0 bg-black/50 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white dark:bg-slate-900 w-full sm:max-w-2xl sm:rounded-xl rounded-t-3xl max-h-[90vh] flex flex-col animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header - Fixed */}
+            <div className="flex-shrink-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-slate-900 dark:text-white text-xl font-bold">
+                {selectedExercise.name}
+              </h2>
+              <button
+                onClick={closeModal}
+                className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            {/* Scrollable Modal Content */}
+            <div className="flex-1 overflow-y-auto min-h-0">
+              <div className="p-6 space-y-6">
+              {/* Exercise Image */}
+              {selectedExercise.imageUrl && (
+                <div
+                  className="w-full h-64 rounded-xl bg-cover bg-center"
+                  style={{ backgroundImage: `url("${selectedExercise.imageUrl}")` }}
+                />
+              )}
+
+              {/* Exercise Info */}
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1.5 rounded-full bg-gradient-primary text-white text-sm font-medium capitalize">
+                  {selectedExercise.category}
+                </span>
+                <span className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-medium capitalize">
+                  {selectedExercise.difficulty}
+                </span>
+                {selectedExercise.equipment && (
+                  <span className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-medium capitalize">
+                    {selectedExercise.equipment.replace("_", " ")}
+                  </span>
+                )}
+              </div>
+
+              {/* Description */}
+              {selectedExercise.description && (
+                <div>
+                  <h3 className="text-slate-900 dark:text-white font-semibold mb-2">
+                    Description
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-300 text-sm">
+                    {selectedExercise.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Muscle Groups */}
+              {selectedExercise.muscleGroups && selectedExercise.muscleGroups.length > 0 && (
+                <div>
+                  <h3 className="text-slate-900 dark:text-white font-semibold mb-2">
+                    Target Muscles
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedExercise.muscleGroups.map((muscle, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm capitalize"
+                      >
+                        {muscle}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Instructions - How to Perform */}
+              {selectedExercise.instructions && (
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
+                  <h3 className="text-slate-900 dark:text-white font-semibold mb-3 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary-start">menu_book</span>
+                    How to Perform
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+                    {selectedExercise.instructions}
+                  </p>
+                </div>
+              )}
+
+              {/* Video Link */}
+              {selectedExercise.videoUrl && (
+                <div>
+                  <a
+                    href={selectedExercise.videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full bg-gradient-primary text-white rounded-lg py-3 font-medium hover:shadow-lg transition-all"
+                  >
+                    <span className="material-symbols-outlined">play_circle</span>
+                    Watch Video Tutorial
+                  </a>
+                </div>
+              )}
+
+              </div>
+            </div>
+
+            {/* Action Buttons - Fixed at bottom */}
+            <div className="flex-shrink-0 flex gap-3 pt-4 pb-20 sm:pb-6 px-6 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+              <button
+                onClick={closeModal}
+                className="flex-1 bg-gradient-primary text-white rounded-lg py-3 font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">add</span>
+                Add to Workout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes slide-up {
+          from {
+            transform: translateY(100%);
+          }
+          to {
+            transform: translateY(0);
+          }
+        }
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 }

@@ -37,6 +37,8 @@ model User {
   nutrition     Nutrition[]
   meals         Meal[]
   mealTemplates MealTemplate[]
+  workouts      Workout[]
+  weightLogs    WeightLog[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -152,4 +154,107 @@ model MealTemplate {
   updatedAt   DateTime @updatedAt
 
   @@index([userId])
+}
+
+model Exercise {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String   // chest, back, legs, shoulders, arms, core, cardio, flexibility
+  difficulty  String   // beginner, intermediate, advanced
+  equipment   String?  // barbell, dumbbell, bodyweight, machine, cable, resistance_band
+  instructions String? @db.Text
+  imageUrl    String?
+  videoUrl    String?
+  muscleGroups String[] // primary muscles worked
+  isCustom    Boolean  @default(false) // true if user-created
+  userId      String?  // null for system exercises, set for custom exercises
+
+  workoutExercises WorkoutExercise[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([userId])
+}
+
+model Workout {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  date        DateTime @default(now())
+  duration    Int?     // in minutes
+  caloriesBurned Int?
+  notes       String?
+  isCompleted Boolean  @default(false)
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercises   WorkoutExercise[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, date])
+}
+
+model WorkoutExercise {
+  id          String   @id @default(cuid())
+  workoutId   String
+  exerciseId  String
+  sets        Int      @default(3)
+  reps        Int?
+  weight      Float?   // in kg (average or last set)
+  duration    Int?     // in seconds (for cardio/time-based exercises)
+  restTime    Int?     // in seconds
+  notes       String?
+  order       Int      @default(0) // order in workout
+  isCompleted Boolean  @default(false)
+
+  workout     Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  workoutSets WorkoutSet[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([workoutId])
+  @@index([exerciseId])
+}
+
+model WorkoutSet {
+  id                String   @id @default(cuid())
+  workoutExerciseId String
+  setNumber         Int      // 1, 2, 3, etc.
+  reps              Int?
+  weight            Float?   // in kg
+  duration          Int?     // in seconds (for time-based exercises)
+  restTime          Int?     // rest time after this set in seconds
+  isCompleted       Boolean  @default(false)
+  notes             String?
+
+  workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([workoutExerciseId, setNumber])
+  @@index([workoutExerciseId])
+}
+
+model WeightLog {
+  id          String   @id @default(cuid())
+  userId      String
+  weight      Float    // in kg
+  date        DateTime @default(now())
+  notes       String?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
 }
